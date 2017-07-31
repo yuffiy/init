@@ -1,0 +1,23 @@
+{
+  "name": "create-rabi",
+  "version": "0.0.1",
+  "description": "Initial rabbit app.",
+  "main": "index.js",
+  "bin": {
+	  "create-rabi": "bin/cli.js"
+  },
+  "scripts": {
+	  "test": "jest"
+  },
+  "repository": {
+	  "type": "git",
+	  "url": "git+https://github.com/yuffiy/init.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+	  "url": "https://github.com/rabbitlive/create-rabi/issues"
+  },
+  "homepage": "https://github.com/yuffiy/init#readme"
+}
