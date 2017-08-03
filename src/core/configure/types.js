@@ -19,8 +19,7 @@ export type Configs = {
 }
 
 export type Model = {
-  configs: Configs,
-  error:   ?Error
+  configs: Configs | Error,
 } 
 
 

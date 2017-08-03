@@ -152,7 +152,7 @@ export class App extends Component {
       // .then(writeScripts)
       // .then(endRewrite)
       .catch(emitError(done))
-      //.then(done)
+    //.then(done)
   }
   render() {
     const {

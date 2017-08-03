@@ -2,8 +2,10 @@
 // -*- coding: utf-8 -*-
 // @flow
 
+import { combineReducers }    from 'redux'
 import argv                   from 'yargs-parser'
 import matchGithubRepo        from 'core/util/match-github-repo'
+import createReducer          from 'core/util/create-reducer'
 import type { ThunkAction }   from 'core/util/thunk-action-type'
 import type { GithubRepo }    from 'core/util/match-github-repo'
 
@@ -26,38 +28,38 @@ export const initModel: Model = {
     immutable:    false,
     router:       true
   },
-  error: null
+  environment: {
+    nodejs:   null,
+    git:      null,
+    yarn:     null,
+    crossenv: null
+  }
 }
 
 
 /// UPDATE
 
-function configure(model: Model = initModel, action: Action): Model {
-  if(!action && !action.type) {
-    return model
+const configs: $Prototype<initModel, 'configs'> = createReducer(initModel, {
+  
+  // Get options success
+  [ActionType.GET_OPTIONS_DONE]: (_, { payload }) => payload,
+
+  // Get options failed
+  [ActionType.GET_OPTIONS_FAIL]: (_, { type, payload }) => {
+    return payload
   }
+})
 
-  const { type, payload } = action
+const environment: $Prototype<initModel, 'environment'> = createReducer(initModel, {
+  
+  
+  
+}) 
 
-  switch(type) {
-    case ActionType.GET_OPTIONS_DONE:
-      return {
-          ...model,
-        configs: payload
-      }
-
-    case ActionType.GET_OPTIONS_FAIL:
-      return {
-          ...model,
-        error: payload
-      }
-      
-    default:
-      return model
-  }
-}
-
-export default configure 
+export default combineReducers({
+  configs,
+  environment
+}) 
 
 
 /// ACTION
