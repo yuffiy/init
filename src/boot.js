@@ -13,8 +13,10 @@ import { h, render } from 'ink'
 
 
 function main() {
-  const Root = require('./index').default
-  render(<Root />)
+  const Root   = require('./index').default
+  const handle = require('./index').postProcess
+  const target = render(<Root />)
+  handle && handle(target)
 }
 
 if(module.hot) {

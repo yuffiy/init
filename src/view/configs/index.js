@@ -50,7 +50,7 @@ function Table(props) {
             <Label name={data[0]} max={max} />
             <span>
               <Text yellow>
-                {data[1]}
+                {String(data[1])}
               </Text>
             </span>
           </div>

@@ -21,12 +21,10 @@ import { actions as generator } from 'core/generator'
 import { actions as install }   from 'core/install'
 import { actions as rewrite }   from 'core/rewrite'
 
-
 export class App extends Component {
   componentDidMount() {
     const {
-      parseArgs,
-      configed,
+      getOpts,
       checkNodejs,
       checkGit,
       checkYarn,
@@ -92,73 +90,76 @@ export class App extends Component {
 
     Promise.resolve()
       .then(beginConfigure)
-      .then(parseArgs)
+      .then(getOpts)
       .then(endConfigure)
-      .then(beginChecking)
-      .then(checkNodejs)
-      .then(checkGit)
-      .then(checkYarn)
-      .then(endChecking)
-      .then(beginInit)
-      .then(generatePackageConfig)
-      .then(endInit)
-      .then(beginGenerate)
-      .then(generateBabelConfig)
-      .then(generateEditorConfig)
-      .then(generateFlowConfig)
-      .then(generateSourceDirConfig)
-      .then(generateBootJsConfig)
-      .then(generateIndexJsConfig)
-      .then(generateSourceCoreDirConfig)
-      .then(generateCoreIndexJsConfig)
-      .then(generateSourceViewDirConfig)
-      .then(generateViewIndexJsConfig)
-      .then(endGenerate)
-      .then(beginInstall)
-      .then(installWebpack)
-      .then(installWebpackDevServer)
-      .then(installCacheLoader)
-      .then(installBabelLoader)
-      .then(installBabelPresetEnv)
-      .then(installBabelPresetReact)
-      .then(installBabelPluginTransformObjectRestSpread)
-      .then(installBabelPluginSyntaxDynamicImport)
-      .then(installUglifyjsWebpackPlugin)
-      .then(installReactHotLoader)
-      .then(installCssLoader)
-      .then(installStyleLoader)
-      .then(installPostcssLoader)
-      .then(installPostcssNext)
-      .then(installPostcssShort)
-      .then(installPostcssScss)
-      .then(installPostcssEasing)
-      .then(installPostcssStripInlineComments)
-      .then(installExtractTextWebpackPlugin)
-      .then(installHtmlWebpackPlugin)
-      .then(installHtmlWebpackTemplate)
-      .then(installHistory)
-      .then(installLodash)
-      .then(installNormalizeCss)
-      .then(installReact)
-      .then(installReactDom)
-      .then(installRedux)
-      .then(installReactRedux)
-      .then(installReactRouter)
-      .then(installReactRouterRedux)
-      .then(installReduxThunk)
-      .then(endInstall)
-      .then(beginMakeBuild)
-      .then(generateWebpackConfig)
-      .then(endMakeBuild)
-      .then(beginRewrite)
-      .then(writeScripts)
-      .then(endRewrite)
+      // .then(beginChecking)
+      // .then(checkNodejs)
+      // .then(checkGit)
+      // .then(checkYarn)
+      // .then(endChecking)
+      // .then(beginInit)
+      // .then(generatePackageConfig)
+      // .then(endInit)
+      // .then(beginGenerate)
+      // .then(generateBabelConfig)
+      // .then(generateEditorConfig)
+      // .then(generateFlowConfig)
+      // .then(generateSourceDirConfig)
+      // .then(generateBootJsConfig)
+      // .then(generateIndexJsConfig)
+      // .then(generateSourceCoreDirConfig)
+      // .then(generateCoreIndexJsConfig)
+      // .then(generateSourceViewDirConfig)
+      // .then(generateViewIndexJsConfig)
+      // .then(endGenerate)
+      // .then(beginInstall)
+      // .then(installWebpack)
+      // .then(installWebpackDevServer)
+      // .then(installCacheLoader)
+      // .then(installBabelLoader)
+      // .then(installBabelPresetEnv)
+      // .then(installBabelPresetReact)
+      // .then(installBabelPluginTransformObjectRestSpread)
+      // .then(installBabelPluginSyntaxDynamicImport)
+      // .then(installUglifyjsWebpackPlugin)
+      // .then(installReactHotLoader)
+      // .then(installCssLoader)
+      // .then(installStyleLoader)
+      // .then(installPostcssLoader)
+      // .then(installPostcssNext)
+      // .then(installPostcssShort)
+      // .then(installPostcssScss)
+      // .then(installPostcssEasing)
+      // .then(installPostcssStripInlineComments)
+      // .then(installExtractTextWebpackPlugin)
+      // .then(installHtmlWebpackPlugin)
+      // .then(installHtmlWebpackTemplate)
+      // .then(installHistory)
+      // .then(installLodash)
+      // .then(installNormalizeCss)
+      // .then(installReact)
+      // .then(installReactDom)
+      // .then(installRedux)
+      // .then(installReactRedux)
+      // .then(installReactRouter)
+      // .then(installReactRouterRedux)
+      // .then(installReduxThunk)
+      // .then(endInstall)
+      // .then(beginMakeBuild)
+      // .then(generateWebpackConfig)
+      // .then(endMakeBuild)
+      // .then(beginRewrite)
+      // .then(writeScripts)
+      // .then(endRewrite)
       .catch(emitError(done))
       //.then(done)
   }
   render() {
     const {
-      configure,
+      configure: {
+	configs,
+	error
+      },
       process: {
         configure: configureFlag,
         checking:  checkingFlag,
@@ -227,12 +228,10 @@ export class App extends Component {
     
     return (
       <div>
-        <Header indent={10}>
-          Application Bootstrapper
-        </Header>
+        <Header indent={10} title="Rabbit Application Bootstrapper" />
 
         <Section flag={configureFlag} title="Configure Application">
-          <Configs configs={configure} />
+          <Configs configs={configs} />
         </Section>
 
         <Section flag={checkingFlag} title="Check Commands">
@@ -349,7 +348,8 @@ function done() {
 function emitError(done) {
   return function(err) {
     throw err
-    done && done()
+    process.exit(1)
+    return
   }
 }
 

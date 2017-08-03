@@ -8,30 +8,31 @@ import { h, Indent } from 'ink'
 type Props = {
   indent: number,
   margin: number,
-  children?: *
+  title:  string
 }
 
 function Header(props: Props) {
   const {
     indent = 10,
     margin = 2,
-    children
+    title
   } = props
 
-  const space = Array(margin).fill().map(x => <br />) 
+  const space = Array(margin).fill(<br />)
+  const hr = Array(title.length).fill('-').join('')
   
   return (
     <div>
       <Indent size={indent}>
         {space}
         <div>
-          ------------------------
+          {hr}
         </div>
         <div>
-          {children}
+          {title}
         </div>
         <div>
-          ------------------------
+          {hr}
         </div>
         {space}
       </Indent>

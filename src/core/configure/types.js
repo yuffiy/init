@@ -5,30 +5,46 @@
 
 /// MODEL
 
-export type Model = {
-  appName:    ?string,
-  githubRepo: ?string
+export type Configs = {
+  name:         ?string,
+  target:       string | boolean,
+  framework:    string,
+  typed:        boolean,
+  local:        boolean,
+  git:          boolean,
+  editorconfig: boolean,
+  lodash:       boolean,
+  immutable:    boolean,
+  router:       boolean
 }
+
+export type Model = {
+  configs: Configs,
+  error:   ?Error
+} 
 
 
 /// ACTION
 
-export const CONFIGURE: string = Symbol()
-export type ParseArgsAction = {
-  type: CONFIGURE,
-  payload: Configs
+export const GET_OPTIONS_DONE: string = 'GET_OPTIONS_DONE'
+export const GET_OPTIONS_FAIL: string = 'GET_OPTIONS_FAIL'
+
+export type GetOptsDoneAction = {
+  type: GET_OPTIONS_DONE,
+  payload: Model
 }
 
-export const CONFIGED: string = Symbol()
-export type ConfigedAction = {
-  type: CONFIGED
+export type GetOptsFailAction = {
+  type: GET_OPTIONS_FAIL,
+  payload: Error,
+  error: true
 }
 
 export type Action =
-  | ParseArgsAction
-  | ConfigedAction
+  | GetOptsDoneAction
+  | GetOptsFailAction
 
 export default {
-  CONFIGURE,
-  CONFIGED
+  GET_OPTIONS_DONE,
+  GET_OPTIONS_FAIL
 }
