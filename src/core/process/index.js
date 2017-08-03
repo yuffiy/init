@@ -13,8 +13,9 @@ export const initModel: Model = {
   checking:  1,
   init:      1,
   generate:  1,
+  makebuild: 1,
   install:   1,
-  start:     1
+  rewrite:   1
 }
 
 
@@ -77,6 +78,18 @@ function updateFlag(model: Model = initModel, action: ActionType): Model {
         generate: 3
       }
     }
+    case ActionType.MAKEBUILD_BEGIN: {
+      return {
+          ...model,
+        makebuild: 2
+      }
+    }
+    case ActionType.MAKEBUILD_END: {
+      return {
+          ...model,
+        makebuild: 3
+      }
+    }
     case ActionType.INSTALL_BEGIN: {
       return {
           ...model,
@@ -89,16 +102,16 @@ function updateFlag(model: Model = initModel, action: ActionType): Model {
         install: 3
       }
     }
-    case ActionType.START_BEGIN: {
+    case ActionType.REWRITE_BEGIN: {
       return {
           ...model,
-        start: 2
+        rewrite: 2
       }
     }
-    case ActionType.START_END: {
+    case ActionType.REWRITE_END: {
       return {
           ...model,
-        start: 3
+        rewrite: 3
       }
     }
 
@@ -124,12 +137,14 @@ export const actions = {
   beginChecking:  makeProcess(ActionType.CHECKING_BEGIN),
   beginInit:      makeProcess(ActionType.INIT_BEGIN),
   beginGenerate:  makeProcess(ActionType.GENERATE_BEGIN),
+  beginMakeBuild: makeProcess(ActionType.MAKEBUILD_BEGIN),
   beginInstall:   makeProcess(ActionType.INSTALL_BEGIN),
-  beginStart:     makeProcess(ActionType.START_BEGIN),
+  beginRewrite:   makeProcess(ActionType.REWRITE_BEGIN),
   endConfigure:   makeProcess(ActionType.CONFIGURE_END),
   endChecking:    makeProcess(ActionType.CHECKING_END),
   endInit:        makeProcess(ActionType.INIT_END),
   endGenerate:    makeProcess(ActionType.GENERATE_END),
+  endMakeBuild:   makeProcess(ActionType.MAKEBUILD_END),
   endInstall:     makeProcess(ActionType.INSTALL_END),
-  endStart:       makeProcess(ActionType.START_END)
+  endRewrite:     makeProcess(ActionType.REWRITE_END)
 }

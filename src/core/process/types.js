@@ -15,8 +15,9 @@ export type Model = {
   checking:  FLAG,
   init:      FLAG,
   generate:  FLAG,
+  makebuild: FLAG,
   install:   FLAG,
-  start:     FLAG
+  rewrite:   FLAG
 }
 
 
@@ -62,6 +63,16 @@ export type GenerateEndAction = {
   type: GENERATE_END
 }
 
+export const MAKEBUILD_BEGIN: string = Symbol()
+export type MakeBuildBeginAction = {
+  type: MAKEBUILD_BEGIN
+}
+
+export const MAKEBUILD_END: string = Symbol()
+export type MakeBuildEndAction = {
+  type: MAKEBUILD_END
+}
+
 export const INSTALL_BEGIN: string = Symbol()
 export type InstallBeginAction = {
   type: INSTALL_BEGIN
@@ -72,14 +83,14 @@ export type InstallEndAction = {
   type: INSTALL_END
 }
 
-export const START_BEGIN: string = Symbol()
-export type StartBeginAction = {
-  type: START_BEGIN
+export const REWRITE_BEGIN: string = Symbol()
+export type RewriteBeginAction = {
+  type: REWRITE_BEGIN
 }
 
-export const START_END: string = Symbol()
-export type StartEndAction = {
-  type: START_END
+export const REWRITE_END: string = Symbol()
+export type RewriteEndAction = {
+  type: REWRITE_END
 }
 
 
@@ -92,10 +103,12 @@ export type Action =
   | InitEndAction
   | GenerateBeginAction
   | GenerateEndAction
+  | MakeBuildBeginAction
+  | MakeBuildEndAction
   | InstallBeginAction
   | InstallEndAction
-  | StartBeginAction
-  | StartEndAction
+  | RewriteBeginAction
+  | RewriteEndAction
 
 export default {
   CONFIGURE_BEGIN,
@@ -106,8 +119,10 @@ export default {
   INIT_END,
   GENERATE_BEGIN,
   GENERATE_END,
+  MAKEBUILD_BEGIN,
+  MAKEBUILD_END,
   INSTALL_BEGIN,
   INSTALL_END,
-  START_BEGIN,
-  START_END
+  REWRITE_BEGIN,
+  REWRITE_END
 }

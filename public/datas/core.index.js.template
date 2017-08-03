@@ -1,7 +1,6 @@
 // -*- mode: js -*-
 // -*- coding: utf-8 -*-
 // @flow
-// @jsx h
 
 /**
  * core
@@ -40,13 +39,9 @@ const init = {
 const middleware = applyMiddleware(thunkMiddleware)
 
 const enhancer = process.env.NODE_ENV === 'development'
-  ? compose // window && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({})
+  ? window && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({})
   : compose
 
 const store = createStore(update, init, enhancer(middleware))
 
 export default store
-
-// store.subscribe(() => {
-//   //console.log(store.getState())
-// })

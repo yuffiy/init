@@ -14,7 +14,7 @@ type Props = {
 function Section(props: Props) {
   const { title, flag, children } = props
   
-  return flag && flag <= 1 ? null : (
+  return !flag || flag <= 1 ? null : (
     <div>
       <div>
         <Text cyan>[RABBIT] </Text>
@@ -24,6 +24,7 @@ function Section(props: Props) {
       <Indent size={1}>
         {children}
       </Indent>
+      <br />
     </div>
   )
 }

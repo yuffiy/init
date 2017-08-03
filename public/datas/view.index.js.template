@@ -1,0 +1,10 @@
+// -*- mode: js-jsx -*-
+// -*- coding: utf-8 -*-
+// @flow
+
+import React from 'react'
+
+
+function App() {
+  return <div>Hello World</div>
+}

@@ -13,24 +13,48 @@ type Props = {
 
 }
 
+type State = 0 | 1 | 2
+
 function Checker(props: Props) {
   const { name, result } = props
+  const state: State = result === null
+        ? 0
+        : (result !== undefined
+           ? 1
+           : 2) 
   
   return (
     <div>
-      <span>Checking... </span>
-      {result === null ? (<span>{name}</span>) : (
-        result !== undefined ? (
-          <span>
-            <Text green>DONE</Text> {name} Version: {result}
-          </span>
-        ) : (
-          <span>
-            <Text red>FAIL</Text> {name} Can{"'"}t find.
-          </span>
-        ))}
+      <Process state={state} name={name} result={result} />
     </div>
   )
+}
+
+function Process(props) {
+  const { state, name, result } = props
+  
+  switch(state) {
+    case 0:
+      return (
+        <span>
+          <Text gray>WAIT</Text> {name} Checking...
+        </span>
+      )
+    case 1:
+      return (
+        <span>
+          <Text green>DONE</Text> {name} Version: {result}
+        </span>
+      )
+    case 2:
+      return (
+        <span>
+          <Text red>FAIL</Text> {name} Can{"'"}t find
+        </span>
+      )
+    default:
+      throw new Error(`Unknow state ${state}`)
+  }
 }
 
 export default Checker
