@@ -4,26 +4,26 @@
 // @jsx h
 
 import { h, Indent } from 'ink'
+import { connect }   from 'ink-redux'
+
 
 type Props = {
-  indent: number,
-  margin: number,
-  title:  string
+  max:          number,
+  title:        string,
+  titleVMargin: number
 }
 
 function Header(props: Props) {
-  const {
-    indent = 10,
-    margin = 2,
-    title
-  } = props
+  
+  const { titleVMargin, title, max } = props
 
-  const space = Array(margin).fill(<br />)
-  const hr = Array(title.length).fill('-').join('')
+  const space = Array(titleVMargin).fill(<br />)
+  const hr    = Array(title.length).fill('-').join('')
+  const pad   = Math.ceil((max - title.length) / 2)
   
   return (
     <div>
-      <Indent size={indent}>
+      <Indent size={pad}>
         {space}
         <div>
           {hr}
@@ -40,5 +40,9 @@ function Header(props: Props) {
   )
 }
 
-export default Header
+function mapStateToProps(state) {
+  return state.configure.options
+}
+
+export default connect(mapStateToProps)(Header)
 

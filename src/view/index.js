@@ -5,6 +5,7 @@
 
 import { h, Component, Text, Indent } from 'ink'
 import { connect } from 'ink-redux'
+import Spinner             from 'ink-spinner'
 import { bindActionCreators } from 'redux'
 
 import Header   from 'view/header'
@@ -13,6 +14,8 @@ import Configs  from 'view/configs'
 import Checker  from 'view/checker'
 import Generate from 'view/generate'
 import Install  from 'view/install'
+import Configure from 'view/configure'
+import Router    from 'view/router'
 
 import { actions as configure } from 'core/configure'
 import { actions as checking }  from 'core/checking'
@@ -228,11 +231,14 @@ export class App extends Component {
     
     return (
       <div>
-        <Header indent={10} title="Rabbit Application Bootstrapper" />
-
+        <Header />
+        <Router />
+        <Configure />
+        {/*
         <Section flag={configureFlag} title="Configure Application">
           <Configs configs={configs} />
         </Section>
+        
 
         <Section flag={checkingFlag} title="Check Commands">
           <Checker name="Git" result={git} />
@@ -336,6 +342,7 @@ export class App extends Component {
         <Section flag={rewriteFlag} title="Write Scripts">
           <Text green>Done, Type C-c to exit</Text>
         </Section>
+        */}
       </div>
     )
   }

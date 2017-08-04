@@ -17,7 +17,9 @@ function Section(props: Props) {
   return !flag || flag <= 1 ? null : (
     <div>
       <div>
-        <Text cyan>[RABBIT] </Text>
+        <Text cyan>[RABBIT] </Text>        
+      </div>
+      <div>
         <span>{title}</span>
       </div>
       <br />
