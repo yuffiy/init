@@ -2,6 +2,8 @@
 // -*- coding: utf-8 -*-
 // @flow
 
+import type { Model as TaskModel } from 'core/task/types'
+
 
 /// MODEL
 
@@ -19,15 +21,17 @@ export type Configs = {
 }
 
 export type Environment = {
-  nodejs:   boolean,
-  git:      boolean,
-  yarn:     boolean,
-  crossenv: boolean
-} 
+  [string]: Error | null | {
+    command:   string,
+    version:   string,
+    required:  boolean
+  }
+}
 
 export type Model = {
-  configs: ?(Configs | Error),
-  environment: ?(Environment | Error),
+  tasks:           TaskModel,
+  configs:         ?(Configs | Error),
+  environment:     Environment | Error,
   +options: {
     +max:          number,
     +title:        string,
@@ -66,14 +70,51 @@ export type EndConfigureAction = {
 }
 
 // Check required commands
-export const CHECK_COMMAND: string = 'CHECK_COMMAND'
+export const CHECK_COMMAND:   string = 'CHECK_COMMAND'
+export const INIT_CHECKER:    string = 'INIT_CHECKER'
+export const CHECK_COMPLETED: string = 'CHECK_COMPLETED'
+export const CHECK_FAIL:      string = 'CHECK_FAIL'
 
 export type CheckCommandAction = {
-  type:    CHECK_COMMAND,
+  type:      CHECK_COMMAND,
   payload: {
     command: string,
     version: string
   }
+}
+
+export type InitCheckerAction = {
+  type:      INIT_CHECKER,
+  payload: {
+    command: string
+  }
+}
+
+export type CheckCompletedAction = {
+  type: CHECK_COMPLETED
+}
+
+export type CheckFailAction = {
+  type:    CHECK_FAIL,
+  payload: Error,
+  error:   true
+}
+
+// Handle task actions.
+export const NEXT_CONFIGURE_TASK: string = 'NEXT_CONFIGURE_TASK'
+export const CONFIGURE_TASK_DONE: string = 'CONFIGURE_TASK_DONE'
+export const CONFIGURE_TASK_FAIL: string = 'CONFIGURE_TASK_FAIL'
+
+export type TurnNextTaskAction = {
+  type: NEXT_CONFIGURE_TASK
+}
+
+export type TaskDoneAction = {
+  type: CONFIGURE_TASK_DONE
+}
+
+export type TaskFailAction = {
+  type: CONFIGURE_TASK_FAIL
 }
  
 export type Action =
@@ -82,11 +123,23 @@ export type Action =
   | BeginConfigureAction
   | EndConfigureAction
   | CheckCommandAction
+  | CheckCompletedAction
+  | InitCheckerAction
+  | CheckFailAction
+  | TurnNextTaskAction
+  | TaskDoneAction
+  | TaskFailAction
 
 export default {
   GET_OPTIONS_DONE,
   GET_OPTIONS_FAIL,
   BEGIN_CONFIGURE,
   END_CONFIGURE,
-  CHECK_COMMAND
+  CHECK_COMMAND,
+  INIT_CHECKER,
+  CHECK_COMPLETED,
+  CHECK_FAIL,
+  NEXT_CONFIGURE_TASK,
+  CONFIGURE_TASK_DONE,
+  CONFIGURE_TASK_FAIL
 }

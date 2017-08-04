@@ -9,13 +9,13 @@
  */
 
 function matchFlag(flag) {
-  switch(true) {
-    case flag === null:
-      return [{ gray:  true }, 'working']
-    case flag instanceof Error:
+  switch(flag) {
+    case 1:
+      return [{ green: true }, 'success']
+    case 2:
       return [{ red:   true }, 'ooooops']
     default:
-      return [{ green: true }, 'success']
+      return [{ gray:  true }, 'working']
   }
 }
 

@@ -15,7 +15,7 @@ import { promisify } from 'util'
 function test(cmd: string): Promise<?string> {
   return new Promise(resolve => {
     promisify(exec)(cmd)
-      .then((stdout, stderr) => {
+      .then(({ stdout, stderr }) => {
         if(stderr) {
           resolve(null)
           return

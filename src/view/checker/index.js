@@ -4,57 +4,62 @@
 // @jsx h
 
 import { h, Component, Text, Indent } from 'ink'
-import { connect } from 'ink-redux'
-import { bindActionCreators } from 'redux'
-import { startCase } from 'lodash'
+import { connect }                    from 'ink-redux'
+import { bindActionCreators }         from 'redux'
+import { startCase }                  from 'lodash'
 import { actions } from 'core/configure'
+
 
 type Props = {
 
 }
 
-type State = 0 | 1 | 2
-
-function Checker(props: Props) {
-  const { name, result } = props
-  const state: State = result === null
-        ? 0
-        : (result !== undefined
-           ? 1
-           : 2) 
+class Checker extends Component {
   
-  return (
-    <div>
-      <Process state={state} name={name} result={result} />
-    </div>
-  )
-}
+  componentDidMount() {
+    
+    const { configs, checkRequiredCmds } = this.props
 
-function Process(props) {
-  const { state, name, result } = props
+    // Git require. 
+    checkRequiredCmds(configs.local === false)       
+  }
   
-  switch(state) {
-    case 0:
-      return (
-        <span>
-          <Text gray>WAIT</Text> {name} Checking...
-        </span>
-      )
-    case 1:
-      return (
-        <span>
-          <Text green>DONE</Text> {name} Version: {result}
-        </span>
-      )
-    case 2:
-      return (
-        <span>
-          <Text red>FAIL</Text> {name} Can{"'"}t find
-        </span>
-      )
-    default:
-      throw new Error(`Unknow state ${state}`)
+  render() {
+    
+    const { configs, environment } = this.props
+    
+    const cmds = Object.keys(environment)
+    const view = cmds.length && cmds.map(cmd => environment[cmd] === null ? (
+      <div>
+        <Text gray>WAIT</Text> {cmd} Checking...
+      </div>
+    ) : (environment[cmd] instanceof Error ? (
+      <div>
+        <Text red>FAIL</Text> {environment[cmd].message} 
+      </div>
+    ) : (
+      <div>
+        <Text green>PASS</Text> {cmd} {environment[cmd].version} 
+      </div>
+    )))
+    
+    return (
+      <div>
+        {view}
+      </div>
+    )
   }
 }
 
-export default Checker
+function mapStateToProps(state) {
+  return {
+    configs:     state.configure.configs,
+    environment: state.configure.environment
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators(actions, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Checker)

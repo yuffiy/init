@@ -48,5 +48,5 @@ const store = createStore(update, init, enhancer(middleware))
 export default store
 
 store.subscribe(() => {
-  //console.log(store.getState().route.routes)
+  //console.log(store.getState().configure.environment)
 })

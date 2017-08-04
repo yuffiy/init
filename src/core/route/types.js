@@ -2,15 +2,14 @@
 // -*- coding: utf-8 -*-
 // @flow
 
+import type { Model as TaskModel } from 'core/task/types'
+
 
 /// MODEL
 
 export type Model = {
-  routes:  {
-    tasks:   Array<string>,
-    startAt: number,
-  },
-  flag:      ?boolean
+  routes: TaskModel,
+  flag:   ?boolean
 }
 
 
@@ -24,7 +23,6 @@ export type TurnNextAction = {
 }
 
 // Set completed flag
-
 export const SET_FLAG: string = 'SET_FLAG'
 
 export type SetFlagAction = {

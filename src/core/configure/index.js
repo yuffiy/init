@@ -2,22 +2,41 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-import { combineReducers }         from 'redux'
-import argv                        from 'yargs-parser'
-import { identity as id }          from 'lodash'
-import matchGithubRepo             from 'helper/match-github-repo'
-import createReducer               from 'helper/create-reducer'
-import type { ThunkAction }        from 'helper/thunk-action-type'
-import type { GithubRepo }         from 'helper/match-github-repo'
-import tryCommand                  from 'helper/try-command'
+import { combineReducers }            from 'redux'
+import argv                           from 'yargs-parser'
+import { identity as id }             from 'lodash'
+import matchGithubRepo                from 'helper/match-github-repo'
+import createReducer                  from 'helper/create-reducer'
+import type { ThunkAction }           from 'helper/thunk-action-type'
+import type { GithubRepo }            from 'helper/match-github-repo'
+import tryCommand                     from 'helper/try-command'
+import Task                           from 'helper/Task'
 
-import { actions as routeActions } from 'core/route'
-import ActionType                  from './types'
-import type { Model, Action }      from './types'
-import { Configs, Environment }    from './types'
+import { actions as routeActions }    from 'core/route'
+import taskUpdate                     from 'core/task'
+import { initModel as taskInitModel } from 'core/task'
+import { actions as taskActions }     from 'core/task'
+
+import ActionType                     from './types'
+import type { Model, Action }         from './types'
+import { Configs, Environment }       from './types'
 
 
 /// MODEL
+
+const configure = new Task({
+  name:    'configure',
+  title:   'Configure Application',
+  cost:    0,
+  actived: false
+})
+
+const checking = new Task({
+  name:    'checking',
+  title:   'Check Requied Command',
+  cost:    0,
+  actived: false
+})
 
 const initConfigs: Configs = {
   name:           null,
@@ -32,20 +51,20 @@ const initConfigs: Configs = {
   router:         true
 }
 
-const initEnvironment: Environment = {
-  nodejs:         null,
-  git:            null,
-  yarn:           null,
-  crossenv:       null
-} 
-
 export const initModel: Model = {
   configs:        null,
-  environment:    null,
+  environment:    {},
   options: {
     max:          60,
     title:        'Application Bootstrapper',
     titleVMargin: 2
+  },
+  tasks: {
+      ...taskInitModel,
+    tasks: [
+      configure,
+      checking
+    ]
   }
 }
 
@@ -54,25 +73,61 @@ export const initModel: Model = {
 
 const configs = createReducer(initModel, {
   
-  // Get options success
+  // Get options success.
   [ActionType.GET_OPTIONS_DONE]: id,
 
-  // Get options failed
+  // Get options failed.
   [ActionType.GET_OPTIONS_FAIL]: id
 })
 
 const environment = createReducer(initModel, {
   
-  // Check commands
-  [ActionType.CHECK_COMMAND]: ({ command, version }) => ({
-    [command]: version
-  })
+  // Check commands.
+  [ActionType.CHECK_COMMAND]: ({ command, version, required }) => ({
+    [command]: {
+      command,
+      version,
+      required
+    }
+  }),
+
+  // Initial checker.
+  [ActionType.INIT_CHECKER]: ({ command }) => ({
+    [command]: null
+  }),
+
+  [ActionType.CHECK_COMPLETED]: (_, environment) => ({
+    
+  }),
+
+  // Check was failed.
+  [ActionType.CHECK_FAIL]: id 
+})
+
+const tasks: Model = createReducer(initModel, {
+  
+  // Turn to next route. 
+  [ActionType.NEXT_CONFIGURE_TASK]: (_, model) => taskUpdate(
+    model,
+    taskActions.next()
+  ),
+
+  [ActionType.CONFIGURE_TASK_DONE]: (_, model) => taskUpdate(
+    model,
+    taskActions.done()
+  ),
+
+  [ActionType.CONFIGURE_TASK_FAIL]: (_, model) => taskUpdate(
+    model,
+    taskActions.fail()
+  )
 })
 
 export default combineReducers({
   configs,
   environment,
-  options: createReducer(initModel)
+  options: createReducer(initModel),
+  tasks
 }) 
 
 
@@ -104,6 +159,7 @@ or
       })
 
       // Exit app.
+      dispatch(fail())
       dispatch(routeActions.exit(false))
       
       return
@@ -120,14 +176,17 @@ or
       if(/(\\|\/|\:|\*|\?|\"|\<|\>|\')/g.test(app)) {
         dispatch({
           type:    ActionType.GET_OPTIONS_FAIL,
-          payload: new Error(`Invalid app name: ${name}. Name has some special char.`),
+          payload: new Error(`\
+Invalid app name: ${name}. Name should not have special char.
+`),
           error:   true
         })
 
-	// Exit app.
-	dispatch(routeActions.exit(false))
+	      // Exit app.
+        dispatch(fail())
+	      dispatch(routeActions.exit(false))
 
-	return
+	      return
       }
 
       // Set local.
@@ -153,38 +212,75 @@ or
       }
     })
 
-    dispatch({
-      
-    })
+    // Turn to next task.
+    dispatch(done())
+    dispatch(next())
   }
 }
 
-function check(command, query) {
+function check(command, query, required) {
   return dispatch => {
+
+    // Init checker, set flag on begin check process.
+    dispatch({
+      type: ActionType.INIT_CHECKER,
+      payload: {
+        command
+      }
+    })
+
+    // Check command version.
     tryCommand(query).then(version => {
-      
       let ver: string = version === null
-	  ? 'FAIL'
-	  : 'PASS' + version
-      
-      disaptch({
-	type: CHECK_COMMAND,
-	payload: {
-	  command,
-	  version: ver
-	}
+	        ? new Error(`${command} Can't find.`)
+	        : version.trim()
+
+      dispatch({
+	      type: ActionType.CHECK_COMMAND,
+	      payload: {
+	        command,
+	        version: ver,
+          required
+	      }
       })
+
     }).catch(err => {
-      
+      console.log(err)
       // Exit app.
       dispatch(routeActions.exit(false))
     })
   }
 }
 
+function checkRequiredCmds(isNeedGit) {
+  return dispatch => {
+    Promise.resolve()
+      .then(dispatch(check('NodeJs', `node1 --version`, true)))
+      .then(dispatch(check('Yarn', `yarn --version`, true)))
+      .then(dispatch(check('cross-env', `cross-env`, false)))
+      .then(dispatch(check('Git', `git --version`, isNeedGit)))
+      .then(dispatch({ type: ActionType.CHECK_COMPLETED }))
+      //.then(_ => {
+        
+            // if(version instanceof Error) {
+            //   dispatch({
+            //     type: ActionType.CHECK_FAIL,
+            //     payload: new Error(`NodeJs was required`),
+            //     error: true
+            //   })
+            //   dispatch(fail())
+            //   dispatch(routeActions.exit(false))
+              
+            //   return
+            // }
+      //})
+  }
+}
+
 function begin() {
   return dispatch => {
     dispatch({ type: ActionType.BEGIN_CONFIGURE })
+    dispatch(next())
     dispatch(getOpts())
   } 
 }
@@ -195,9 +291,22 @@ function end() {
   } 
 }
 
+function next() {
+  return { type: ActionType.NEXT_CONFIGURE_TASK }
+}
+
+function done() {
+  return { type: ActionType.CONFIGURE_TASK_DONE }
+}
+
+function fail() {
+  return { type: ActionType.CONFIGURE_TASK_FAIL }
+}
+
 export const actions = {
   getOpts,
   begin,
   end,
-  check
+  check,
+  checkRequiredCmds
 }

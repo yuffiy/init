@@ -2,14 +2,17 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-import { combineReducers }    from 'redux'
-import { identity as id }     from 'lodash'
-import createReducer          from 'helper/create-reducer'
-import updateAt               from 'helper/update-at'
-import Task                   from 'helper/Task'
+import { combineReducers }            from 'redux'
+import { identity as id }             from 'lodash'
+import createReducer                  from 'helper/create-reducer'
+import updateAt                       from 'helper/update-at'
+import Task                           from 'helper/Task'
 
-import ActionType             from './types'
-import type { Model, Action } from './types'
+import taskUpdate                     from 'core/task'
+import { initModel as taskInitModel } from 'core/task'
+import { actions as taskActions }     from 'core/task'
+import ActionType                     from './types'
+import type { Model, Action }         from './types'
 
 
 /// MODEL
@@ -45,7 +48,7 @@ const postProcessing = new Task({
 export const initModel: Model = {
   flag: null,
   routes: {
-    startAt: 0,
+      ...taskInitModel,
     tasks: [
       configure,
       initialize,
@@ -61,25 +64,7 @@ export const initModel: Model = {
 const routes: Model = createReducer(initModel, {
   
   // Turn to next route. 
-  [ActionType.NEXT_ROUTE]: (_, { tasks, startAt }) => {
-
-    const actived: number = tasks.findIndex(route => route.actived === true)
-    const idx:     number = actived === -1 ? 0 : actived + 1 
-    const now:     number = Date.now()
-
-    if(actived + 1 === tasks.length) return    
-
-    return {
-      startAt: now,
-      tasks: updateAt(tasks, idx, route => ({
-        
-          ...route,
-        
-        actived: true,
-        cost:    now - startAt
-      }))
-    }
-  }
+  [ActionType.NEXT_ROUTE]: (_, model) => taskUpdate(model, taskActions.next())
 })
 
 const flag: Model = createReducer(initModel, {

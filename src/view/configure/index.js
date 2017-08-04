@@ -12,9 +12,11 @@
 import { h, Component, Indent }    from 'ink'
 import { connect }                 from 'ink-redux'
 import { bindActionCreators }      from 'redux'
+import mapTaskToFlag               from 'helper/map-task-to-flag'
 
 import Section                     from 'view/section'
 import Options                     from 'view/options'
+import Checker                     from 'view/checker'
 
 import { actions }                 from 'core/configure'
 import { actions as routeActions } from 'core/route'
@@ -24,7 +26,9 @@ class Configure extends Component {
   
   componentDidMount() {
     this.props.next()
-    this.props.begin()    
+    this.props.begin()
+
+    // .then(check('NodeJs', `node --version`))
   }
 
   componentWillUnmount() {
@@ -32,16 +36,27 @@ class Configure extends Component {
   }
   
   render() {
-    const { configs, environment } = this.props
+    const { configs, environment, tasks } = this.props
+    const [ taskConfigure, taskChecking ] = tasks.tasks
+
+    const configureView = (
+      <Section flag={mapTaskToFlag(taskConfigure)}
+               title={taskConfigure.title}>
+        <Options options={configs} />
+      </Section>
+    )
+
+    const checkingView = (
+      <Section flag={mapTaskToFlag(taskChecking)}
+               title={taskChecking.title}>
+        <Checker environment={environment} />
+      </Section>
+    )
     
     return (
       <Indent size={1}>
-        <Section flag={configs} title="Configure Application">
-          <Options options={configs} />
-        </Section>
-        <Section flag={environment} title="Checking Environment">
-          <Options options={configs} />
-        </Section>
+        {taskConfigure.actived ? configureView : null}
+        {taskChecking.actived  ? checkingView  : null}
       </Indent>
     )
   }

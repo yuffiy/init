@@ -12,6 +12,9 @@
  * @param {Model}
  */
 
+import { isPlainObject } from 'lodash'
+
+
 type Handles<M, A> = {
   [string]: (a: A, m: M) => ?M
 }
@@ -37,8 +40,8 @@ function createReducer<M, A>(init: M, handles: Handles): * {
     // Can't update model when handle return undefined.
     if(_model === undefined) return model
 
-    // If has error, handle error by self. 
-    if(error) return _model
+    // If has error or not object. 
+    if(error || !isPlainObject(_model)) return _model
 
     // Auto combine with old model.
     return {
