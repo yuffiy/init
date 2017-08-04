@@ -2,40 +2,46 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-import { combineReducers }    from 'redux'
-import argv                   from 'yargs-parser'
-import { identity as id }     from 'lodash'
-import matchGithubRepo        from 'helper/match-github-repo'
-import createReducer          from 'helper/create-reducer'
-import type { ThunkAction }   from 'helper/thunk-action-type'
-import type { GithubRepo }    from 'helper/match-github-repo'
+import { combineReducers }         from 'redux'
+import argv                        from 'yargs-parser'
+import { identity as id }          from 'lodash'
+import matchGithubRepo             from 'helper/match-github-repo'
+import createReducer               from 'helper/create-reducer'
+import type { ThunkAction }        from 'helper/thunk-action-type'
+import type { GithubRepo }         from 'helper/match-github-repo'
+import tryCommand                  from 'helper/try-command'
 
-import ActionType             from './types'
-import RouteActionType        from 'core/route/types'
-import type { Model, Action } from './types'
+import { actions as routeActions } from 'core/route'
+import ActionType                  from './types'
+import type { Model, Action }      from './types'
+import { Configs, Environment }    from './types'
 
 
 /// MODEL
 
+const initConfigs: Configs = {
+  name:           null,
+  target:         'web',
+  framework:      'react/redux/router',
+  typed:          true,
+  local:          false,
+  git:            true,
+  editorconfig:   true,
+  lodash:         true,
+  immutable:      false,
+  router:         true
+}
+
+const initEnvironment: Environment = {
+  nodejs:         null,
+  git:            null,
+  yarn:           null,
+  crossenv:       null
+} 
+
 export const initModel: Model = {
-  configs: {
-    name:         null,
-    target:       'web',
-    framework:    'react/redux/router',
-    typed:        true,
-    local:        false,
-    git:          true,
-    editorconfig: true,
-    lodash:       true,
-    immutable:    false,
-    router:       true
-  },
-  environment: {
-    nodejs:   null,
-    git:      null,
-    yarn:     null,
-    crossenv: null
-  },
+  configs:        null,
+  environment:    null,
   options: {
     max:          60,
     title:        'Application Bootstrapper',
@@ -46,7 +52,7 @@ export const initModel: Model = {
 
 /// UPDATE
 
-const configs: $Prototype<initModel, 'configs'> = createReducer(initModel, {
+const configs = createReducer(initModel, {
   
   // Get options success
   [ActionType.GET_OPTIONS_DONE]: id,
@@ -55,17 +61,18 @@ const configs: $Prototype<initModel, 'configs'> = createReducer(initModel, {
   [ActionType.GET_OPTIONS_FAIL]: id
 })
 
-const environment: $Prototype<initModel, 'environment'> = createReducer(initModel, {
+const environment = createReducer(initModel, {
   
+  // Check commands
+  [ActionType.CHECK_COMMAND]: ({ command, version }) => ({
+    [command]: version
+  })
 })
-
-const options: $Prototype<initModel, 'environment'> = createReducer(initModel)
-
 
 export default combineReducers({
   configs,
   environment,
-  options
+  options: createReducer(initModel)
 }) 
 
 
@@ -80,11 +87,26 @@ function getOpts(): ThunkAction {
 
     // Check app name.
     if(!name.length) {
-      return dispatch({
+      dispatch({
         type:    ActionType.GET_OPTIONS_FAIL,
-        payload: new Error(`Can't find any app or github repo name.`),
+        payload: new Error(`\
+Can't provide any app name or github repo name.
+
+Usage:
+
+  create-rabbit app
+
+or
+
+  create-rabbit user/repo 
+`),
         error:   true
       })
+
+      // Exit app.
+      dispatch(routeActions.exit(false))
+      
+      return
     }
 
     // Validate name when local mode
@@ -96,11 +118,16 @@ function getOpts(): ThunkAction {
 
       // Check name has special chars on local mode.
       if(/(\\|\/|\:|\*|\?|\"|\<|\>|\')/g.test(app)) {
-        return dispatch({
+        dispatch({
           type:    ActionType.GET_OPTIONS_FAIL,
-          payload: new Error(`Invalid app name: ${name}. App name has some special char.`),
+          payload: new Error(`Invalid app name: ${name}. Name has some special char.`),
           error:   true
         })
+
+	// Exit app.
+	dispatch(routeActions.exit(false))
+
+	return
       }
 
       // Set local.
@@ -116,14 +143,41 @@ function getOpts(): ThunkAction {
     }
 
     // Configure options.
-    return dispatch({
+    dispatch({
       type: ActionType.GET_OPTIONS_DONE,
       payload: {
-          ...initModel.configs,
+          ...initConfigs,
           ...options,
         name:  app,
         local: local
       }
+    })
+
+    dispatch({
+      
+    })
+  }
+}
+
+function check(command, query) {
+  return dispatch => {
+    tryCommand(query).then(version => {
+      
+      let ver: string = version === null
+	  ? 'FAIL'
+	  : 'PASS' + version
+      
+      disaptch({
+	type: CHECK_COMMAND,
+	payload: {
+	  command,
+	  version: ver
+	}
+      })
+    }).catch(err => {
+      
+      // Exit app.
+      dispatch(routeActions.exit(false))
     })
   }
 }
@@ -131,7 +185,7 @@ function getOpts(): ThunkAction {
 function begin() {
   return dispatch => {
     dispatch({ type: ActionType.BEGIN_CONFIGURE })
-    dispatch({ type: RouteActionType.NEXT_ROUTE })
+    dispatch(getOpts())
   } 
 }
 
@@ -144,5 +198,6 @@ function end() {
 export const actions = {
   getOpts,
   begin,
-  end
+  end,
+  check
 }

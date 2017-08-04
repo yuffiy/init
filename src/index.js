@@ -17,7 +17,7 @@ function Root(): React.Element<*> {
 }
 
 export function postProcess(unmount) {
-  global.unmount = unmount
+  global.exit = unmount
 } 
 
 export default Root

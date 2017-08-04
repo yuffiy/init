@@ -2,9 +2,12 @@
 // -*- coding: utf-8 -*-
 // @flow
 
+import { combineReducers }    from 'redux'
+import { identity as id }     from 'lodash'
 import createReducer          from 'helper/create-reducer'
 import updateAt               from 'helper/update-at'
-import Task                   from 'helper/Route'
+import Task                   from 'helper/Task'
+
 import ActionType             from './types'
 import type { Model, Action } from './types'
 
@@ -40,43 +43,54 @@ const postProcessing = new Task({
 })
 
 export const initModel: Model = {
-  startAt: 0,
-  routes: [
-    configure,
-    initialize,
-    install,
-    postProcessing
-  ]
+  flag: null,
+  routes: {
+    startAt: 0,
+    tasks: [
+      configure,
+      initialize,
+      install,
+      postProcessing
+    ]
+  }
 }
 
 
 /// UPDATE
 
-const routing: Model = createReducer(initModel, {
+const routes: Model = createReducer(initModel, {
   
   // Turn to next route. 
-  [ActionType.NEXT_ROUTE]: (_, { routes, startAt }) => {
-    
-    const actived: number = routes.findIndex(route => route.actived === true)
+  [ActionType.NEXT_ROUTE]: (_, { tasks, startAt }) => {
+
+    const actived: number = tasks.findIndex(route => route.actived === true)
     const idx:     number = actived === -1 ? 0 : actived + 1 
     const now:     number = Date.now()
 
-    if(actived + 1 === routes.length) return    
+    if(actived + 1 === tasks.length) return    
 
     return {
       startAt: now,
-      routes: updateAt(routes, idx, route => ({
+      tasks: updateAt(tasks, idx, route => ({
+        
           ...route,
         
         actived: true,
         cost:    now - startAt
-        
       }))
     }
   }
 })
 
-export default routing
+const flag: Model = createReducer(initModel, {
+  // Set completed flag.
+  [ActionType.SET_FLAG]: id
+})
+
+export default combineReducers({
+  routes,
+  flag
+})
 
 
 /// ACTION
@@ -87,6 +101,20 @@ function next(): Action {
   }
 }
 
+function exit(flag): Action {
+  return dispatch => {
+    dispatch({
+      type: ActionType.SET_FLAG,
+      payload: flag
+    })
+
+    process.nextTick(() => {
+      process.exit(Number(!flag))
+    })
+  }
+}
+
 export const actions = {
-  next
+  next,
+  exit
 }

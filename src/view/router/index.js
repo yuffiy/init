@@ -12,7 +12,25 @@ type Props = {
 }
 
 export function Router(props: Props) {
-  const { routes, max } = props
+  
+  const { routes, flag, max } = props
+
+  if(flag !== null) {
+    return (
+      <div>
+        <Indent size={pad(max, 4)}>
+          <Text green={ flag === true }
+                red={ flag === false }>
+            { flag ? 'DONE' : 'FAIL' }
+          </Text>
+        </Indent>
+        <br />
+        <br />
+      </div>
+    )
+  }
+
+  
   const len = routes.reduce((acc, route) => acc + String(route).length + 2, 0)
 
   const routesView = routes.map(route => (
@@ -20,13 +38,14 @@ export function Router(props: Props) {
           green={route.actived === true}>
       <span> {String(route)} </span>
     </Text>
-  )) 
-  
+  ))
+
   return (
     <div>
       <Indent size={pad(max, len)}>
         {routesView}
       </Indent>
+      <br />
       <br />
     </div>
   )
@@ -34,7 +53,8 @@ export function Router(props: Props) {
 
 function mapStateToProps(state) {
   return {
-    routes: state.route.routes,
+    routes: state.route.routes.tasks,
+    flag: state.route.flag,
     max: state.configure.options.max
   }
 }

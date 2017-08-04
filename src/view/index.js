@@ -92,9 +92,9 @@ export class App extends Component {
     } = this.props
 
     Promise.resolve()
-      .then(beginConfigure)
-      .then(getOpts)
-      .then(endConfigure)
+      // .then(beginConfigure)
+      // .then(getOpts)
+      // .then(endConfigure)
       // .then(beginChecking)
       // .then(checkNodejs)
       // .then(checkGit)
@@ -160,8 +160,8 @@ export class App extends Component {
   render() {
     const {
       configure: {
-	configs,
-	error
+	      configs,
+	      error
       },
       process: {
         configure: configureFlag,

@@ -4,24 +4,27 @@
 // @jsx h
 
 /**
- * configure
+ * <Configure />
  *
  * Parse args and test environment. 
  */
 
-import { h, Component }       from 'ink'
-import { connect }            from 'ink-redux'
-import { bindActionCreators } from 'redux'
-import Spinner                from 'ink-spinner'
+import { h, Component, Indent }    from 'ink'
+import { connect }                 from 'ink-redux'
+import { bindActionCreators }      from 'redux'
 
-import Section                from 'view/section'
-import { actions }            from 'core/configure'
+import Section                     from 'view/section'
+import Options                     from 'view/options'
+
+import { actions }                 from 'core/configure'
+import { actions as routeActions } from 'core/route'
 
 
 class Configure extends Component {
   
   componentDidMount() {
-    this.props.begin()
+    this.props.next()
+    this.props.begin()    
   }
 
   componentWillUnmount() {
@@ -29,12 +32,17 @@ class Configure extends Component {
   }
   
   render() {
-    const { configs } = this.props
+    const { configs, environment } = this.props
     
     return (
-      <Section flag={2} title="Configure Application">
-        <Spinner />
-      </Section>
+      <Indent size={1}>
+        <Section flag={configs} title="Configure Application">
+          <Options options={configs} />
+        </Section>
+        <Section flag={environment} title="Checking Environment">
+          <Options options={configs} />
+        </Section>
+      </Indent>
     )
   }
 }
@@ -44,7 +52,10 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators(actions, dispatch)
+  return {
+      ...bindActionCreators(actions,      dispatch),
+      ...bindActionCreators(routeActions, dispatch)
+  }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Configure)

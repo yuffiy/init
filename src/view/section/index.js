@@ -4,6 +4,7 @@
 // @jsx h
 
 import { h, Text, Indent } from 'ink'
+import matchFlag           from 'helper/match-task-flag'
 
 type Props = {
   title: string,
@@ -12,21 +13,20 @@ type Props = {
 }
 
 function Section(props: Props) {
-  const { title, flag, children } = props
   
-  return !flag || flag <= 1 ? null : (
+  const { title, flag, children } = props
+  const [ color, text ] = matchFlag(flag) 
+  
+  return (
     <div>
       <div>
-        <Text cyan>[RABBIT] </Text>        
-      </div>
-      <div>
+        <Text {...color}>{`{ ${text} } `}</Text>
         <span>{title}</span>
       </div>
       <br />
-      <Indent size={1}>
+      <Indent size={2}>
         {children}
       </Indent>
-      <br />
     </div>
   )
 }

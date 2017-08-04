@@ -3,23 +3,23 @@
 // @flow
 
 /**
- * Route
+ * Task
  *
  * @class
  */
 
-class Route {
+class Task {
   constructor(options = {}) {
     const { name, title, cost, actived } = options
     
-    this.name    = name
-    this.title   = title
-    this.cost    = cost
-    this.actived = actived
+    this.name     = name
+    this.title    = title
+    this.cost     = cost
+    this.actived  = actived
   }
 
-  map(fx: (Route) => Route): Route {
-    return new Route(fx(this))
+  map(fx: (Task) => Task): Task {
+    return new Task(fx(this))
   }
 
   toString() {
@@ -27,4 +27,4 @@ class Route {
   }
 }
 
-export default Route
+export default Task
