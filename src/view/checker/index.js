@@ -7,6 +7,7 @@ import { h, Component, Text, Indent } from 'ink'
 import { connect }                    from 'ink-redux'
 import { bindActionCreators }         from 'redux'
 import { startCase }                  from 'lodash'
+import ErrorView           from 'view/error-view'
 import { actions } from 'core/configure'
 
 
@@ -18,30 +19,50 @@ class Checker extends Component {
   
   componentDidMount() {
     
-    const { configs, checkRequiredCmds } = this.props
+    const { configs, environment, check } = this.props
+
 
     // Git require. 
-    checkRequiredCmds(configs.local === false)       
+    check(configs.local === false)       
   }
   
   render() {
     
     const { configs, environment } = this.props
+
+    if(environment instanceof Error) return <ErrorView error={environment} /> 
+
+    
     
     const cmds = Object.keys(environment)
-    const view = cmds.length && cmds.map(cmd => environment[cmd] === null ? (
-      <div>
-        <Text gray>WAIT</Text> {cmd} Checking...
-      </div>
-    ) : (environment[cmd] instanceof Error ? (
-      <div>
-        <Text red>FAIL</Text> {environment[cmd].message} 
-      </div>
-    ) : (
-      <div>
-        <Text green>PASS</Text> {cmd} {environment[cmd].version} 
-      </div>
-    )))
+    const view = cmds.length && cmds.map(key => {
+      const cmd = environment[key]
+      
+      if(cmd === null)
+        return (
+          <div>
+            <Text gray>{`{ checking }`}</Text> {key} Checking...
+          </div>
+        )
+
+      const { version, command, required } = cmd
+      const label = required ? 'required' : 'optional'
+      
+
+      if(version instanceof Error)
+        return (
+          <div>
+            <Text red>{`{ ${label} }`}</Text> {version.message} 
+          </div>
+        )
+
+
+      return (
+        <div>
+          <Text green>{`{ ${label} }`}</Text> {command} {version} 
+        </div>
+      )
+    })
     
     return (
       <div>

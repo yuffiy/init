@@ -96,10 +96,6 @@ const environment = createReducer(initModel, {
     [command]: null
   }),
 
-  [ActionType.CHECK_COMPLETED]: (_, environment) => ({
-    
-  }),
-
   // Check was failed.
   [ActionType.CHECK_FAIL]: id 
 })
@@ -182,11 +178,11 @@ Invalid app name: ${name}. Name should not have special char.
           error:   true
         })
 
-	      // Exit app.
+	// Exit app.
         dispatch(fail())
-	      dispatch(routeActions.exit(false))
+	dispatch(routeActions.exit(false))
 
-	      return
+	return
       }
 
       // Set local.
@@ -218,7 +214,7 @@ Invalid app name: ${name}. Name should not have special char.
   }
 }
 
-function check(command, query, required) {
+function checkCmd(command, query, required) {
   return dispatch => {
 
     // Init checker, set flag on begin check process.
@@ -230,19 +226,23 @@ function check(command, query, required) {
     })
 
     // Check command version.
-    tryCommand(query).then(version => {
+    return tryCommand(query).then(version => {
       let ver: string = version === null
-	        ? new Error(`${command} Can't find.`)
-	        : version.trim()
+	  ? new Error(`${command} Can't find.`)
+	  : version.trim().replace(/\n/, ' ')
+
+      const payload = {
+	command,
+	version: ver,
+        required
+      }
 
       dispatch({
-	      type: ActionType.CHECK_COMMAND,
-	      payload: {
-	        command,
-	        version: ver,
-          required
-	      }
+	type: ActionType.CHECK_COMMAND,
+	payload
       })
+
+      return payload 
 
     }).catch(err => {
       console.log(err)
@@ -252,28 +252,65 @@ function check(command, query, required) {
   }
 }
 
-function checkRequiredCmds(isNeedGit) {
+function checkFailed(environment) {
   return dispatch => {
-    Promise.resolve()
-      .then(dispatch(check('NodeJs', `node1 --version`, true)))
-      .then(dispatch(check('Yarn', `yarn --version`, true)))
-      .then(dispatch(check('cross-env', `cross-env`, false)))
-      .then(dispatch(check('Git', `git --version`, isNeedGit)))
-      .then(dispatch({ type: ActionType.CHECK_COMPLETED }))
-      //.then(_ => {
-        
-            // if(version instanceof Error) {
-            //   dispatch({
-            //     type: ActionType.CHECK_FAIL,
-            //     payload: new Error(`NodeJs was required`),
-            //     error: true
-            //   })
-            //   dispatch(fail())
-            //   dispatch(routeActions.exit(false))
-              
-            //   return
-            // }
-      //})
+    dispatch({
+      type:    ActionType.CHECK_FAIL,
+      payload: environment,
+      error:   true
+    })
+    dispatch(fail())
+    dispatch(routeActions.exit(false))
+  }
+}
+
+function check(isNeedGit) {    
+  return (dispatch, getState) => {
+    
+    const cmds = []
+    
+    return Promise.resolve([])
+      .then(_ => dispatch(checkCmd('NodeJs', `node --version`, true)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('Yarn', `yarn --version`, true)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('Git', `git --version`, isNeedGit)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('cross-env', `cross-env`, false)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('Webpack', `webpack --version`, false)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('WebpackDevServer', `webpack-dev-server --version`, false)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('Jest', `jest --version`, false)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => dispatch(checkCmd('Flow', `flow version`, false)))
+      .then(cmd => cmds.push(cmd))
+      .then(_ => {
+	const failed = cmds.filter(cmd => {      
+	  const { version, required } = cmd
+	  return required && version instanceof Error
+	}, [])
+
+	if(failed.length !== 0) { 
+
+	  const format = failed.map(c => c.command).join(', ')
+	  dispatch({
+            type: ActionType.CHECK_FAIL,
+            payload: new Error(`Can't find ${format}`),
+            error: true
+          })
+	  
+          dispatch(fail())
+          dispatch(routeActions.exit(false))
+
+	  return
+	}
+
+	dispatch(done())
+	dispatch(routeActions.next())
+	//dispatch(routeActions.exit())
+      })
   }
 }
 
@@ -307,6 +344,5 @@ export const actions = {
   getOpts,
   begin,
   end,
-  check,
-  checkRequiredCmds
+  check
 }

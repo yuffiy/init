@@ -10,13 +10,21 @@
 
 class Task {
   constructor(options = {}) {
-    const { name, title, cost, actived, error } = options
+    const {
+      name,
+      title,
+      cost     = 0,
+      actived  = false,
+      error    = null,
+      status   = 0
+    } = options
     
     this.name     = name
     this.title    = title
     this.cost     = cost
     this.actived  = actived
     this.error    = error
+    this.status   = status
   }
 
   map(fx: (Task) => Task): Task {

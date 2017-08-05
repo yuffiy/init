@@ -26,17 +26,16 @@ const nextTask: Model = createReducer(initModel, {
   [ActionType.NEXT_TASK]: (_, { tasks }) => {
 
     const actived: number = tasks.findIndex(task => task.actived === true)
-    const idx:     number = actived === -1 ? 0 : actived + 1 
+    const index:   number = actived === -1 ? 0 : actived + 1 
 
-    if(actived + 1 === tasks.length) return    
+    if(index === tasks.length) return
 
     return {      
-      tasks: updateAt(tasks, idx, task => ({
-        
-          ...task,
-       
-        actived: true
-      }))
+      tasks: tasks.map((task, idx) => task.map(t => ({
+          ...t,
+        actived: idx === index,
+        status:  idx === index ? 1 : t.status
+      })))
     }
   },
 
@@ -52,7 +51,8 @@ const nextTask: Model = createReducer(initModel, {
         
           ...task,
         
-        cost: now - startAt
+        cost:   now - startAt,
+        status: 2
       }))
     }
   },
@@ -68,8 +68,10 @@ const nextTask: Model = createReducer(initModel, {
       tasks: updateAt(tasks, idx, task => ({
         
           ...task,
-        
-        error: true 
+
+        cost:   now - startAt,
+        error:  true,
+        status: 3
       }))
     }
   }

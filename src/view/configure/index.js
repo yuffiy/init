@@ -40,22 +40,24 @@ class Configure extends Component {
     const [ taskConfigure, taskChecking ] = tasks.tasks
 
     const configureView = (
-      <Section flag={mapTaskToFlag(taskConfigure)}
-               title={taskConfigure.title}>
+      <Section flag={taskConfigure.status}
+               title={taskConfigure.title}
+               cost={taskConfigure.cost}>
         <Options options={configs} />
       </Section>
     )
 
     const checkingView = (
-      <Section flag={mapTaskToFlag(taskChecking)}
-               title={taskChecking.title}>
+      <Section flag={taskChecking.status}
+               title={taskChecking.title}
+               cost={taskChecking.cost}>
         <Checker environment={environment} />
       </Section>
     )
     
     return (
       <Indent size={1}>
-        {taskConfigure.actived ? configureView : null}
+        {taskConfigure.actived || taskConfigure.cost > 0 ? configureView : null}
         {taskChecking.actived  ? checkingView  : null}
       </Indent>
     )

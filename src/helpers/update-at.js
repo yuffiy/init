@@ -10,7 +10,7 @@
 
 function updateAt<T>(array: Array<T>, index: number, callback: T => T): Array<T> {
   const elem: T = array[index]
-  const mappable: boolean = typeof elem.map === 'function'
+  const mappable: boolean = elem && typeof elem.map === 'function'
 
   return [
       ...array.slice(0, index),

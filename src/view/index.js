@@ -228,12 +228,21 @@ export class App extends Component {
         writed
       }
     } = this.props
-    
+
+    const [
+      configureTask,
+      initializeTask,
+      installTask,
+      postProcessingTask
+    ] = this.props.route.routes.tasks
+
     return (
       <div>
         <Header />
         <Router />
-        <Configure />
+        
+        {configureTask.status < 2 && <Configure />}
+        
         {/*
         <Section flag={configureFlag} title="Configure Application">
           <Configs configs={configs} />

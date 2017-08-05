@@ -7,8 +7,8 @@
  */
 
 function mapper(task) {
-  if(task.cost > 0) return 1
   if(task.error)    return 2
+  if(task.cost > 0) return 1
   return 0
 }
 

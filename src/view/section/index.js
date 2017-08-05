@@ -14,7 +14,7 @@ type Props = {
 
 function Section(props: Props) {
   
-  const { title, flag, children } = props
+  const { title, flag, children, cost } = props
   const [ color, text ] = matchFlag(flag) 
   
   return (
@@ -22,6 +22,7 @@ function Section(props: Props) {
       <div>
         <Text {...color}>{`{ ${text} } `}</Text>
         <span>{title}</span>
+        {cost !== 0 && <Text {...color}> {cost} ms</Text>}
       </div>
       <br />
       <Indent size={2}>

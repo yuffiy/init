@@ -10,10 +10,11 @@
 
 function matchFlag(flag) {
   switch(flag) {
-    case 1:
-      return [{ green: true }, 'success']
     case 2:
+      return [{ green: true }, 'success']
+    case 3:
       return [{ red:   true }, 'ooooops']
+    case 1:
     default:
       return [{ gray:  true }, 'working']
   }
